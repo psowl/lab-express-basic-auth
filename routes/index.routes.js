@@ -37,10 +37,9 @@ router.get('/login', (req, res, next) => {
 router.post('/login', (req, res, next) => {
     const {username, password} = req.body
   
-    
     if (!username || !password) {
-      res.render('auth/login', {
-        errorMessage: 'Please enter both, email and password to login.'
+      res.render('login', {
+        errorMessage: 'Please enter both, username and password to login.'
       });
       return; 
     }
@@ -52,15 +51,14 @@ router.post('/login', (req, res, next) => {
           return; 
         }
   
-
         if (bcryptjs.compareSync(password, user.password)) {
-          console.log('user ok', user)
+          console.log('correct user', user)
   
           req.session.user = user
   
           res.send('logged!')
         } else {
-          res.render('/login', {errorMessage: 'Incorrect username/password'})
+          res.render('login', {errorMessage: 'Incorrect username/password'})
         }
       })
       .catch(err => {
@@ -69,7 +67,7 @@ router.post('/login', (req, res, next) => {
   
   })
 
-  router.get('/profile', (req, res, next) => {
+router.get('/profile', (req, res, next) => {
     if (!req.session.user) {
       res.redirect('/login')
     }
@@ -77,6 +75,26 @@ router.post('/login', (req, res, next) => {
     res.render('users/userProfile', {
       user: req.session.user
     })
+})
+
+router.get('/main',(req, res, next) => {
+    res.render('protected-routes/main')
+})
+
+router.get('/private',(req, res, next) => {
+
+    if (!req.session.user) {
+        res.redirect('/login')
+      }
+    
+      res.render('protected-routes/private', {
+        user: req.session.user
+      })
+})
+
+router.get('/logout', (req, res, next) => {
+    req.session.destroy()
+    res.send('ok delogged')
   })
 
 module.exports = router;
